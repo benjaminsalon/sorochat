@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, String, Symbol, Vec};
+use soroban_sdk::{contract, contractimpl, contracttype, vec, Address, Env, String, Symbol, Vec};
 
 #[derive(Clone)]
 #[contracttype]
@@ -25,8 +25,12 @@ pub struct ChatContract;
 #[contractimpl]
 impl ChatContract {
     pub fn write_message(env: Env, from: Address, to: Address, msg: String) {
-        // First retrieve the conversation between from and to
-        // let conversation = env.storage().instance().get::<_,
+        // First we need to retrieve the possibly already existing conversation between from and to
+        let conversation = env
+            .storage()
+            .instance()
+            .get::<_, Conversation>(&DataKey::Conversations(ConversationsKey(from, to)))
+            .unwrap_or(vec![&env]);
     }
 }
 
