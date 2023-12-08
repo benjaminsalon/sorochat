@@ -6,6 +6,7 @@ use soroban_sdk::{contract, contractimpl, contracttype, vec, Address, Env, Strin
 pub struct ConversationsKey(pub Address, pub Address);
 
 #[contracttype]
+#[derive(Clone, Debug)]
 pub struct Message {
     msg: String,
 }
@@ -73,6 +74,26 @@ impl ChatContract {
 
         // And we don't forget to set the state storage with the new value
         env.storage().instance().set(&key.clone(), &conversation);
+    }
+
+    pub fn read_conversation(env: Env, from: Address, to: Address) -> Conversation {
+        let key = DataKey::Conversations(ConversationsKey(from.clone(), to.clone()));
+        let mut conversation = env
+            .storage()
+            .instance()
+            .get::<_, Conversation>(&key)
+            .unwrap_or(vec![&env]);
+        conversation
+    }
+
+    pub fn read_conversations_initiated(env: Env, from: Address) -> ConversationsInitiated {
+        let key = DataKey::ConversationsInitiated(from);
+        let mut conversations_initiated = env
+            .storage()
+            .instance()
+            .get::<_, ConversationsInitiated>(&key)
+            .unwrap_or(vec![&env]);
+        conversations_initiated
     }
 }
 
