@@ -1,7 +1,7 @@
 #![cfg(test)]
 
-use crate::{ChatContract, ChatContractClient, Conversation, Message};
-use soroban_sdk::{log, testutils::Address as _, vec, Address, Env, String};
+use crate::{ChatContract, ChatContractClient, Message};
+use soroban_sdk::{testutils::Address as _, vec, Address, Env, String};
 
 #[test]
 fn test() {
@@ -9,6 +9,7 @@ fn test() {
 
     let from = Address::random(&env);
     let to = Address::random(&env);
+    let to_2 = Address::random(&env);
 
     let contract_id = env.register_contract(None, ChatContract);
     let client = ChatContractClient::new(&env, &contract_id);
@@ -35,5 +36,27 @@ fn test() {
     let conversations_initiated = client.read_conversations_initiated(&from);
     assert_eq!(conversations_initiated, vec![&env, to.clone()]);
     let conversations_initiated = client.read_conversations_initiated(&to);
+    assert_eq!(conversations_initiated, vec![&env, from.clone()]);
+
+    client.write_message(&from, &to_2, &String::from_slice(&env, "Bonjour l'ami!"));
+    let conversation_after = client.read_conversation(&from, &to_2);
+    // log!(&env, "{:?}", conversation_after);
+    assert_eq!(conversation_after.len(), 1);
+    assert_eq!(
+        conversation_after,
+        vec![
+            &env,
+            Message {
+                msg: String::from_slice(&env, "Bonjour l'ami!")
+            }
+        ]
+    );
+
+    let conversations_initiated = client.read_conversations_initiated(&from);
+    assert_eq!(
+        conversations_initiated,
+        vec![&env, to.clone(), to_2.clone()]
+    );
+    let conversations_initiated = client.read_conversations_initiated(&to_2);
     assert_eq!(conversations_initiated, vec![&env, from]);
 }

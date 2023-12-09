@@ -9,12 +9,13 @@ import * as SorobanClient from 'soroban-client';
 import { contractInvoke } from '@soroban-react/contracts'
 
 import contracts_ids from 'contracts/contracts_ids.json'
-// import { useGreeting } from './useGreeting'
-import { scvalToString } from '@/utils/scValConversions'
 import React from 'react'
 import Link from 'next/link'
 
-type UpdateGreetingValues = { newMessage: string }
+import ConversationsList from '../chat/ConversationsList'
+import Conversation from '../chat/Conversation'
+import {type Message} from '../chat/Conversation'
+type NewMessageData = { newMessage: string, destinationAddress: string }
 
 function stringToScVal(title: string) {
   return SorobanClient.xdr.ScVal.scvString(title)
@@ -23,67 +24,60 @@ function stringToScVal(title: string) {
 export const GreeterContractInteractions: FC = () => {
   const sorobanContext = useSorobanReact()
 
-  const [, setFetchIsLoading] = useState<boolean>(false)
   const [updateIsLoading, setUpdateIsLoading] = useState<boolean>(false)
-  const { register, handleSubmit } = useForm<UpdateGreetingValues>()
+  const { register, handleSubmit } = useForm<NewMessageData>()
   
-  // Two options are existing for fetching data from the blockchain
-  // The first consists on using the useContractValue hook demonstrated in the useGreeting.tsx file
-  // This hook simulate the transation to happen on the bockchain and allow to read the value from it
-  // Its main advantage is to allow for updating the value display on the frontend without any additional action
-  // const {isWrongConnection, fetchedGreeting} = useGreeting({ sorobanContext })
-  
-  // The other option, maybe simpler to understand and implement is the one implemented here
-  // Where we fetch the value manually with each change of the state.
-  // We trigger the fetch with flipping the value of updateFrontend or refreshing the page
-  
-  const [fetchedGreeting, setGreeterMessage] = useState<string>()
+  const [fetchedConversationsInitiatedList, setConversationsInitiatedList] = useState<Array<string>>([])
   const [updateFrontend, toggleUpdate] = useState<boolean>(true)
   const [contractAddressStored, setContractAddressStored] = useState<string>()
-
-  // Fetch Greeting
-  const fetchGreeting = useCallback(async () => {
+  const [conversationDisplayedAddress, setConversationDisplayedAddress] = useState<string>("GBE6USSYQZHYHJ7XA77IVBHFVUIIRIFU6GHQ4Y2BCMB37K72O5BXUUHP")
+  const [conversationDisplayed, setConversationDisplayed] = useState<Array<Message>>([])
+  const [conversationIsLoading, setConversationIsLoading] = useState<boolean>(false)
+  // Fetch the addresses of every initiated conversation
+  const fetchConversationsInitiated = useCallback(async () => {
     if (!sorobanContext.server) return
 
     const currentChain = sorobanContext.activeChain?.name?.toLocaleLowerCase()
-    if (!currentChain) {
+    if (!address) {
+      return
+    }
+    else if (!currentChain) {
       console.log("No active chain")
       toast.error('Wallet not connected. Try again…')
       return
     }
     else {
-      const contractAddress = (contracts_ids as Record<string,Record<string,string>>)[currentChain]?.greeting;
+      const contractAddress = (contracts_ids as Record<string,Record<string,string>>)[currentChain]?.chat;
       setContractAddressStored(contractAddress)
-      setFetchIsLoading(true)
+      
       try {
         const result = await contractInvoke({
           contractAddress,
-          method: 'read_title',
-          args: [],
+          method: 'read_conversations_initiated',
+          args: [new SorobanClient.Address(address).toScVal()],
           sorobanContext
         })
         if (!result) throw new Error("Error while fetching. Try Again")
 
         // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
-        // You can check out the scValConversion.tsx file to see how it's done
-        const result_string = scvalToString(result as SorobanClient.xdr.ScVal)
-        setGreeterMessage(result_string)
+        let conversationsInitiated = SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal)
+        setConversationsInitiatedList(conversationsInitiated)
       } catch (e) {
         console.error(e)
-        toast.error('Error while fetching greeting. Try again…')
-        setGreeterMessage(undefined)
+        toast.error('Error while fetching list of conversations. Try again…')
+        setConversationsInitiatedList([])
       } finally {
-        setFetchIsLoading(false)
+        
       }
     }
   },[sorobanContext])
 
-  useEffect(() => {void fetchGreeting()}, [updateFrontend,fetchGreeting])
+  useEffect(() => {void fetchConversationsInitiated()}, [updateFrontend,fetchConversationsInitiated])
 
 
   const { activeChain, server, address } = sorobanContext
 
-  const updateGreeting = async ({ newMessage }: UpdateGreetingValues ) => {
+  const sendMessage = async ({ newMessage, destinationAddress }: NewMessageData ) => {
     if (!address) {
       console.log("Address is not defined")
       toast.error('Wallet is not connected. Try again...')
@@ -102,15 +96,15 @@ export const GreeterContractInteractions: FC = () => {
         return
       }
       else {
-        const contractAddress = (contracts_ids as Record<string,Record<string,string>>)[currentChain]?.greeting;
+        const contractAddress = (contracts_ids as Record<string,Record<string,string>>)[currentChain]?.chat;
 
         setUpdateIsLoading(true)
 
         try {
           const result = await contractInvoke({
             contractAddress,
-            method: 'set_title',
-            args: [stringToScVal(newMessage)],
+            method: 'write_message',
+            args: [new SorobanClient.Address(address).toScVal(),new SorobanClient.Address(destinationAddress).toScVal(), stringToScVal(newMessage)],
             sorobanContext,
             signAndSend: true
           })
@@ -135,29 +129,77 @@ export const GreeterContractInteractions: FC = () => {
     }
   }
 
+  const fetchConversation = useCallback(async () => {
+    if (!sorobanContext.server) return
+    if (!address) {
+      console.log("Address is not defined")
+      toast.error('Wallet is not connected. Try again...')
+      return
+    }
+    else if (!server) {
+      console.log("Server is not setup")
+      toast.error('Server is not defined. Unabled to connect to the blockchain')
+      return
+    }
+    else {
+      const currentChain = activeChain?.name?.toLocaleLowerCase()
+      if (!currentChain) {
+        console.log("No active chain")
+        toast.error('Wallet not connected. Try again…')
+        return
+      }
+      else {
+        const contractAddress = (contracts_ids as Record<string,Record<string,string>>)[currentChain]?.chat;
+        setConversationIsLoading(true)
+        try {
+          const result = await contractInvoke({
+            contractAddress,
+            method: 'read_conversation',
+            args: [new SorobanClient.Address(address).toScVal(),new SorobanClient.Address(conversationDisplayedAddress).toScVal()],
+            sorobanContext
+          })
+          if (!result) throw new Error("Error while fetching. Try Again")
+
+          // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
+          // You can check out the scValConversion.tsx file to see how it's done
+          console.log("CONVERSATION FETCHED =",SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal))
+          let conversation = SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal)
+          // const result_string = scvalToString(result as SorobanClient.xdr.ScVal)
+          setConversationDisplayed(conversation)
+        } catch (e) {
+          console.error(e)
+          toast.error('Error while fetching conversation. Try again…')
+          setConversationDisplayed([])
+        } finally {
+          setConversationIsLoading(false)
+        } 
+      }
+    }
+  }, [conversationDisplayedAddress])
+
+  useEffect(() => {void fetchConversation()}, [conversationDisplayedAddress,fetchConversation,sorobanContext])
+
   return (
-    <>
+    <>{address ?
+      <div tw="mt-10 flex w-full flex-wrap items-start justify-center gap-4">
       <div tw="flex grow flex-col space-y-4 max-w-[20rem]">
-        <h2 tw="text-center font-mono text-gray-400">Greeter Smart Contract</h2>
 
         {/* Fetched Greeting */}
         <Card variant="outline" p={4} bgColor="whiteAlpha.100">
           <FormControl>
-            <FormLabel>Fetched Greeting</FormLabel>
-            <Input
-              placeholder={fetchedGreeting}
-              disabled={true}
-            />
+            <FormLabel>Your Chats</FormLabel>
+            <ConversationsList conversationsList={fetchedConversationsInitiatedList} setDisplayedConversationAddress={setConversationDisplayedAddress}></ConversationsList>
           </FormControl>
         </Card>
 
         {/* Update Greeting */}
         <Card variant="outline" p={4} bgColor="whiteAlpha.100">
-          <form onSubmit={handleSubmit(updateGreeting)}>
+          <form onSubmit={handleSubmit(sendMessage)}>
             <Stack direction="row" spacing={2} align="end">
               <FormControl>
-                <FormLabel>Update Greeting</FormLabel>
-                <Input disabled={updateIsLoading} {...register('newMessage')} />
+                <FormLabel>Send new Message</FormLabel>
+                <Input disabled={updateIsLoading} placeholder='Destination address' {...register('destinationAddress')} />
+                <Input disabled={updateIsLoading} placeholder='Message' {...register('newMessage')} />
               </FormControl>
               <Button
                 type="submit"
@@ -177,7 +219,22 @@ export const GreeterContractInteractions: FC = () => {
           
           {contractAddressStored ? <Link href={"https://stellar.expert/explorer/testnet/contract/" + contractAddressStored} target="_blank">{contractAddressStored}</Link> : "Loading address.."}
         </p>
+        </div>
+        <Card variant="outline" p={4} bgColor="whiteAlpha.100">
+          <FormControl>
+            <FormLabel>Conversation</FormLabel>
+            {!conversationIsLoading ?
+            <Conversation destinationAddress={conversationDisplayedAddress} conversation={conversationDisplayed}></Conversation>
+            :
+            "Loading ..."
+            }
+          </FormControl>
+        </Card>
+      
       </div>
+      :
+      <div></div>
+    }
     </>
   )
 }

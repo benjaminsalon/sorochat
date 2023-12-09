@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, vec, Address, Env, String, Symbol, Vec};
+use soroban_sdk::{contract, contractimpl, contracttype, vec, Address, Env, String, Vec};
 
 #[derive(Clone)]
 #[contracttype]
@@ -78,7 +78,7 @@ impl ChatContract {
 
     pub fn read_conversation(env: Env, from: Address, to: Address) -> Conversation {
         let key = DataKey::Conversations(ConversationsKey(from.clone(), to.clone()));
-        let mut conversation = env
+        let conversation = env
             .storage()
             .instance()
             .get::<_, Conversation>(&key)
@@ -88,12 +88,16 @@ impl ChatContract {
 
     pub fn read_conversations_initiated(env: Env, from: Address) -> ConversationsInitiated {
         let key = DataKey::ConversationsInitiated(from);
-        let mut conversations_initiated = env
+        let conversations_initiated = env
             .storage()
             .instance()
             .get::<_, ConversationsInitiated>(&key)
             .unwrap_or(vec![&env]);
         conversations_initiated
+    }
+
+    pub fn read_title(env: Env) -> String {
+        String::from_slice(&env, "Welcome to Sorochat!")
     }
 }
 
