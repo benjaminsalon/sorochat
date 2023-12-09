@@ -177,7 +177,7 @@ export const GreeterContractInteractions: FC = () => {
     }
   }, [conversationDisplayedAddress])
 
-  useEffect(() => {void fetchConversation()}, [conversationDisplayedAddress,fetchConversation,sorobanContext])
+  useEffect(() => {void fetchConversation()}, [conversationDisplayedAddress,updateFrontend,fetchConversation,sorobanContext])
 
   return (
     <>{address ?
@@ -201,6 +201,14 @@ export const GreeterContractInteractions: FC = () => {
                 <Input disabled={updateIsLoading} placeholder='Destination address' {...register('destinationAddress')} />
                 <Input disabled={updateIsLoading} placeholder='Message' {...register('newMessage')} />
               </FormControl>
+              <Stack direction='column'>
+              <Button
+                mt={4}
+                colorScheme="purple"
+                onClick={() => toggleUpdate((toggle) => !toggle)}
+              >
+                Refresh
+            </Button>
               <Button
                 type="submit"
                 mt={4}
@@ -210,6 +218,7 @@ export const GreeterContractInteractions: FC = () => {
               >
                 Submit
               </Button>
+              </Stack>
             </Stack>
           </form>
         </Card>
@@ -223,6 +232,7 @@ export const GreeterContractInteractions: FC = () => {
         <Card variant="outline" p={4} bgColor="whiteAlpha.100">
           <FormControl>
             <FormLabel>Conversation</FormLabel>
+            
             {!conversationIsLoading ?
             <Conversation destinationAddress={conversationDisplayedAddress} conversation={conversationDisplayed}></Conversation>
             :
