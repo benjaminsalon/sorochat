@@ -29,7 +29,8 @@ fn test() {
         vec![
             &env,
             Message {
-                msg: String::from_slice(&env, "Bonjour l'ami!")
+                msg: String::from_slice(&env, "Bonjour l'ami!"),
+                from: from.clone()
             }
         ]
     );
@@ -48,7 +49,8 @@ fn test() {
         vec![
             &env,
             Message {
-                msg: String::from_slice(&env, "Bonjour l'ami!")
+                msg: String::from_slice(&env, "Bonjour l'ami!"),
+                from: from.clone()
             }
         ]
     );

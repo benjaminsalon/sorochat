@@ -9,6 +9,7 @@ pub struct ConversationsKey(pub Address, pub Address);
 #[derive(Clone, Debug)]
 pub struct Message {
     msg: String,
+    from: Address,
 }
 
 type Conversation = Vec<Message>;
@@ -75,7 +76,10 @@ impl ChatContract {
             .unwrap_or(vec![&env]);
 
         // Then we can add a new message to the conversation
-        let new_message = Message { msg };
+        let new_message = Message {
+            msg,
+            from: from.clone(),
+        };
         conversation.push_back(new_message);
 
         // And we don't forget to set the state storage with the new value ON BOTH SIDES
