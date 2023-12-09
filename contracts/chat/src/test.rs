@@ -6,6 +6,7 @@ use soroban_sdk::{testutils::Address as _, vec, Address, Env, String};
 #[test]
 fn test() {
     let env = Env::default();
+    env.mock_all_auths();
 
     let from = Address::random(&env);
     let to = Address::random(&env);

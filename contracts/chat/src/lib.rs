@@ -52,6 +52,9 @@ pub struct ChatContract;
 #[contractimpl]
 impl ChatContract {
     pub fn write_message(env: Env, from: Address, to: Address, msg: String) {
+        // Ensure that the message sender is the from address
+        from.require_auth();
+
         // First we need to retrieve the possibly already existing conversation between from and to
         let key = DataKey::Conversations(ConversationsKey(from.clone(), to.clone()));
 
