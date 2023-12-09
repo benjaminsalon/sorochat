@@ -14,7 +14,7 @@ import Link from 'next/link'
 
 import ConversationsList from '../chat/ConversationsList'
 import Conversation from '../chat/Conversation'
-import {type Message} from '../chat/Conversation'
+import {type MessageType} from '../chat/Message'
 type NewMessageData = { newMessage: string, destinationAddress: string }
 
 function stringToScVal(title: string) {
@@ -234,7 +234,7 @@ export const GreeterContractInteractions: FC = () => {
             <FormLabel>Conversation</FormLabel>
             
             {!conversationIsLoading ?
-            <Conversation destinationAddress={conversationDisplayedAddress} conversation={conversationDisplayed}></Conversation>
+            <Conversation userConnected={address} destinationAddress={conversationDisplayedAddress} conversation={conversationDisplayed}></Conversation>
             :
             "Loading ..."
             }

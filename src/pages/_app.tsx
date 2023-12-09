@@ -12,6 +12,7 @@ import { Inconsolata } from 'next/font/google'
 import Head from 'next/head'
 
 import MySorobanReactProvider from "../components/web3/MySorobanReactProvider"
+// import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 // Google Font(s) via `next/font`
 const inconsolata = Inconsolata({ subsets: ['latin'] })
@@ -19,6 +20,7 @@ const inconsolata = Inconsolata({ subsets: ['latin'] })
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
+    {/* <SafeAreaProvider> */}
       {/* TODO SEO */}
       <DefaultSeo
         // dangerouslySetAllPagesToNoFollow={!env.isProduction}
@@ -70,6 +72,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           </ChakraProvider>
         </CacheProvider>
       </MySorobanReactProvider>
+      {/* </SafeAreaProvider> */}
     </>
   )
 }
