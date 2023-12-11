@@ -1,12 +1,12 @@
 # SOROCHAT
 
+![Preview](image.png)
+
 SOROCHAT is a nice little messaging dapp built on top of Soroban Testnet for demonstration purpose.
 
 [LIVE VERSION HERE 🕺](https://sorochat.vercel.app/)
 
 Built using the [@create-soroban-dapp](https://github.com/paltalabs/create-soroban-dapp/) boilerplate and script.
-
-![Preview](image.png)
 
 You can find a written [tutorial](https://dev.to/benjaminsalon/sorochat-how-to-build-a-simple-chat-dapp-using-create-soroban-dapp-295l) explaining how to create the dapp on my dev.to 🚀
 ## Build and run
