@@ -1,4 +1,4 @@
-import { Button, Card } from "@chakra-ui/react";
+import { Card } from "@chakra-ui/react";
 
 interface ConversationsListProps {
   conversationsList: Array<string>,
@@ -9,9 +9,9 @@ export default function ConversationsList({conversationsList, setDisplayedConver
 
   return (
     <>
-    {conversationsList.map((address: string) => (
+    {conversationsList.map((address: string, index: number) => (
       <>
-      <Card variant="outline" p={2} bgColor="whiteAlpha.0" 
+      <Card variant="outline" key={index} p={2} bgColor="whiteAlpha.0" 
           onClick={() => setDisplayedConversationAddress(address)} 
           cursor="pointer"
           _hover={{

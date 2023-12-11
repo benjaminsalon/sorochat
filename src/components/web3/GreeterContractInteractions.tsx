@@ -23,7 +23,8 @@ function stringToScVal(title: string) {
 
 export const GreeterContractInteractions: FC = () => {
   const sorobanContext = useSorobanReact()
-
+  const { activeChain, server, address } = sorobanContext
+  
   const [updateIsLoading, setUpdateIsLoading] = useState<boolean>(false)
   const { register, handleSubmit } = useForm<NewMessageData>()
   
@@ -31,7 +32,7 @@ export const GreeterContractInteractions: FC = () => {
   const [updateFrontend, toggleUpdate] = useState<boolean>(true)
   const [contractAddressStored, setContractAddressStored] = useState<string>()
   const [conversationDisplayedAddress, setConversationDisplayedAddress] = useState<string>("")
-  const [conversationDisplayed, setConversationDisplayed] = useState<Array<Message>>([])
+  const [conversationDisplayed, setConversationDisplayed] = useState<Array<MessageType>>([])
   const [conversationIsLoading, setConversationIsLoading] = useState<boolean>(false)
   // Fetch the addresses of every initiated conversation
   const fetchConversationsInitiated = useCallback(async () => {
@@ -60,7 +61,7 @@ export const GreeterContractInteractions: FC = () => {
         if (!result) throw new Error("Error while fetching. Try Again")
 
         // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
-        let conversationsInitiated = SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal)
+        const conversationsInitiated: Array<string> = SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal) as Array<string>
         setConversationsInitiatedList(conversationsInitiated)
       } catch (e) {
         console.error(e)
@@ -70,12 +71,11 @@ export const GreeterContractInteractions: FC = () => {
         
       }
     }
-  },[sorobanContext])
+  },[sorobanContext, address])
 
   useEffect(() => {void fetchConversationsInitiated()}, [updateFrontend,fetchConversationsInitiated])
 
 
-  const { activeChain, server, address } = sorobanContext
 
   const sendMessage = async ({ newMessage, destinationAddress }: NewMessageData ) => {
     if (!address) {
@@ -164,7 +164,7 @@ export const GreeterContractInteractions: FC = () => {
           // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
           // You can check out the scValConversion.tsx file to see how it's done
           console.log("CONVERSATION FETCHED =",SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal))
-          let conversation = SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal)
+          const conversation = SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal) as Array<MessageType>
           // const result_string = scvalToString(result as SorobanClient.xdr.ScVal)
           setConversationDisplayed(conversation)
         } catch (e) {

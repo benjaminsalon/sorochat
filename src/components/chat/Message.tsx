@@ -1,4 +1,4 @@
-import { Box, Card, Text } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 
 export type MessageType = {
     msg: string,
@@ -11,8 +11,7 @@ interface MessageProps {
 }
 
 export function Message({message,userConnected}:MessageProps) {
-    let position = userConnected == message.from ? "right" : "left";
-    let bg_color = userConnected == message.from ? "whiteAlpha.200" : "whiteAlpha.500";
+    const bg_color = userConnected == message.from ? "whiteAlpha.200" : "whiteAlpha.500";
     return (
         <>
             <Box ml='3' bg={bg_color} borderRadius="12" padding="4" margin="4" position="relative" >
