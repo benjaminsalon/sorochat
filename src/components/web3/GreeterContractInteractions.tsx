@@ -111,7 +111,9 @@ export const GreeterContractInteractions: FC = () => {
           
           if (result) {
             toast.success("New chat successfully published!")
-            setConversationDisplayedAddress(destinationAddress ?? conversationDisplayedAddress)
+            if (destinationAddress && destinationAddress != conversationDisplayedAddress) {
+              setConversationDisplayedAddress(destinationAddress)
+            }
           }
           else {
             toast.error("Chat publishing unsuccessful...")
