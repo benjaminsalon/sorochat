@@ -1,4 +1,5 @@
 // import { HomePageTitle } from '@/components/home/HomePageTitle'
+import { HomePageTitle } from '@/components/home/HomePageTitle'
 import { CenterBody } from '@/components/layout/CenterBody'
 // import { ChainInfo } from '@/components/web3/ChainInfo'
 import { ConnectButton } from '@/components/web3/ConnectButton'
@@ -21,7 +22,7 @@ const HomePage: NextPage = () => {
 
       <CenterBody tw="mt-20 mb-10 px-5">
         {/* Title */}
-        {/* <HomePageTitle /> */}
+        <HomePageTitle />
 
         {/* Connect Wallet Button */}
         <ConnectButton />

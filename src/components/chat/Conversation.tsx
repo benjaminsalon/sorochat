@@ -18,11 +18,14 @@ interface ConversationProps {
     //     };
     // })
     return (
-      <div>{destinationAddress}
+        destinationAddress ? 
+      <div>Conversation with {destinationAddress}
       {conversation.map((message: ContractMessageType) => (
         <Message message={message} userConnected={userConnected}/>
       ))}
       </div>
+      :
+      <div>Choose a conversation or send a message to new destination</div>
     );
 
     // return (

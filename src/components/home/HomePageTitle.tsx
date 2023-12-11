@@ -10,8 +10,8 @@ const StyledIconLink = styled(Link)(() => [
 ])
 
 export const HomePageTitle: FC = () => {
-  const title = 'Soroban React Dapp'
-  const desc = 'Full-Stack DApp Boilerplate for Soroban smart contracts'
+  const title = 'SOROCHAT'
+  const desc = 'Simple (not secure) chat app for Soroban.'
   const githubHref = 'https://github.com/paltalabs/create-soroban-dapp/'
 
   return (
@@ -24,41 +24,10 @@ export const HomePageTitle: FC = () => {
           className="group"
           tw="flex cursor-pointer items-center gap-4 rounded-3xl py-1.5 px-3.5 transition-all hover:bg-gray-900"
         >
-          {/* <Image src={inkathonLogo} priority width={60} alt="ink!athon Logo" /> */}
           <h1 tw="font-black text-[2.5rem]">{title}</h1>
         </Link>
-
-        {/* Tagline & Links */}
-        <p tw="mt-2 text-gray-600 text-sm">
-          Largely inspired by the {' '}
-          <a
-            href="https://github.com/scio-labs/inkathon"
-            target="_blank"
-            tw="font-semibold text-gray-500 hover:text-gray-100"
-          >
-            Ink!athon
-          </a>{' '}
-           project.
-        </p>
-        <p tw="mt-2 text-gray-600 text-sm">
-          Adapted by {' '}
-          <a
-            href="https://github.com/benjaminsalon"
-            target="_blank"
-            tw="font-semibold text-gray-500 hover:text-gray-100"
-          >
-            Benjamin Salon
-          </a>{' '}
-          in collaboration with {' '}
-          <a
-            href="https://paltalabs.io"
-            target="_blank"
-            tw="font-semibold text-gray-500 hover:text-gray-100"
-          >
-            PaltaLabs &#129361;
-          </a>{' '}
-        </p>
         <p tw="mt-4 mb-6 text-gray-400">{desc}</p>
+
 
         {/* Github & Vercel Buttons */}
         <div tw="flex space-x-2">

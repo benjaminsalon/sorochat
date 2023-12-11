@@ -30,7 +30,7 @@ export const GreeterContractInteractions: FC = () => {
   const [fetchedConversationsInitiatedList, setConversationsInitiatedList] = useState<Array<string>>([])
   const [updateFrontend, toggleUpdate] = useState<boolean>(true)
   const [contractAddressStored, setContractAddressStored] = useState<string>()
-  const [conversationDisplayedAddress, setConversationDisplayedAddress] = useState<string>("GBE6USSYQZHYHJ7XA77IVBHFVUIIRIFU6GHQ4Y2BCMB37K72O5BXUUHP")
+  const [conversationDisplayedAddress, setConversationDisplayedAddress] = useState<string>("")
   const [conversationDisplayed, setConversationDisplayed] = useState<Array<Message>>([])
   const [conversationIsLoading, setConversationIsLoading] = useState<boolean>(false)
   // Fetch the addresses of every initiated conversation
@@ -104,16 +104,17 @@ export const GreeterContractInteractions: FC = () => {
           const result = await contractInvoke({
             contractAddress,
             method: 'write_message',
-            args: [new SorobanClient.Address(address).toScVal(),new SorobanClient.Address(destinationAddress).toScVal(), stringToScVal(newMessage)],
+            args: [new SorobanClient.Address(address).toScVal(),destinationAddress ? new SorobanClient.Address(destinationAddress).toScVal() : new SorobanClient.Address(conversationDisplayedAddress).toScVal(), stringToScVal(newMessage)],
             sorobanContext,
             signAndSend: true
           })
           
           if (result) {
-            toast.success("New greeting successfully published!")
+            toast.success("New chat successfully published!")
+            setConversationDisplayedAddress(destinationAddress ?? conversationDisplayedAddress)
           }
           else {
-            toast.error("Greeting unsuccessful...")
+            toast.error("Chat publishing unsuccessful...")
             
           }
         } catch (e) {
@@ -148,7 +149,7 @@ export const GreeterContractInteractions: FC = () => {
         toast.error('Wallet not connected. Try again…')
         return
       }
-      else {
+      else if (conversationDisplayedAddress) {
         const contractAddress = (contracts_ids as Record<string,Record<string,string>>)[currentChain]?.chat;
         setConversationIsLoading(true)
         try {
@@ -179,12 +180,16 @@ export const GreeterContractInteractions: FC = () => {
 
   useEffect(() => {void fetchConversation()}, [conversationDisplayedAddress,updateFrontend,fetchConversation,sorobanContext])
 
+  useEffect(() => {
+    setConversationDisplayedAddress("")
+  }, [address])
+
   return (
     <>{address ?
       <div tw="mt-10 flex w-full flex-wrap items-start justify-center gap-4">
       <div tw="flex grow flex-col space-y-4 max-w-[20rem]">
 
-        {/* Fetched Greeting */}
+        {/* Fetched Conversation List */}
         <Card variant="outline" p={4} bgColor="whiteAlpha.100">
           <FormControl>
             <FormLabel>Your Chats</FormLabel>
@@ -192,13 +197,13 @@ export const GreeterContractInteractions: FC = () => {
           </FormControl>
         </Card>
 
-        {/* Update Greeting */}
+        {/* Send Message */}
         <Card variant="outline" p={4} bgColor="whiteAlpha.100">
           <form onSubmit={handleSubmit(sendMessage)}>
             <Stack direction="row" spacing={2} align="end">
               <FormControl>
                 <FormLabel>Send new Message</FormLabel>
-                <Input disabled={updateIsLoading} placeholder='Destination address' {...register('destinationAddress')} />
+                <Input disabled={updateIsLoading} placeholder={conversationDisplayedAddress} {...register('destinationAddress')} />
                 <Input disabled={updateIsLoading} placeholder='Message' {...register('newMessage')} />
               </FormControl>
               <Stack direction='column'>
@@ -230,15 +235,12 @@ export const GreeterContractInteractions: FC = () => {
         </p>
         </div>
         <Card variant="outline" p={4} bgColor="whiteAlpha.100">
-          <FormControl>
-            <FormLabel>Conversation</FormLabel>
             
             {!conversationIsLoading ?
             <Conversation userConnected={address} destinationAddress={conversationDisplayedAddress} conversation={conversationDisplayed}></Conversation>
             :
             "Loading ..."
             }
-          </FormControl>
         </Card>
       
       </div>

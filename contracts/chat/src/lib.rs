@@ -35,16 +35,19 @@ pub fn update_conversations_initiated(env: &Env, from: Address, to: Address) {
         &conversations_initiated_from,
     );
 
-    let mut conversations_initiated_to = env
-        .storage()
-        .instance()
-        .get::<_, ConversationsInitiated>(&DataKey::ConversationsInitiated(to.clone()))
-        .unwrap_or(vec![&env]);
-    conversations_initiated_to.push_back(from.clone());
-    env.storage().instance().set(
-        &DataKey::ConversationsInitiated(to.clone()),
-        &conversations_initiated_to,
-    );
+    // If we are sending chat to ourselves, we don't want to have two different conversations
+    if from != to {
+        let mut conversations_initiated_to = env
+            .storage()
+            .instance()
+            .get::<_, ConversationsInitiated>(&DataKey::ConversationsInitiated(to.clone()))
+            .unwrap_or(vec![&env]);
+        conversations_initiated_to.push_back(from.clone());
+        env.storage().instance().set(
+            &DataKey::ConversationsInitiated(to.clone()),
+            &conversations_initiated_to,
+        );
+    }
 }
 
 #[contract]
@@ -59,11 +62,9 @@ impl ChatContract {
         // First we need to retrieve the possibly already existing conversation between from and to
         let key = DataKey::Conversations(ConversationsKey(from.clone(), to.clone()));
 
-        // We want to update the Conversation Initiated storage if it's the first time we have a conversation
-        // WE NEED TO CHECK BOTH from -> to and to -> from
-        let key_other_side = DataKey::Conversations(ConversationsKey(to.clone(), from.clone()));
+        // We want to update the Conversation Initiated storage if it's the first time we have a conversation between from and to
         let conversation_exists =
-            env.storage().instance().has(&key) && env.storage().instance().has(&key_other_side);
+            env.storage().instance().has(&key) && env.storage().instance().has(&key);
         if !conversation_exists {
             update_conversations_initiated(&env, from.clone(), to.clone())
         }
@@ -82,11 +83,14 @@ impl ChatContract {
         };
         conversation.push_back(new_message);
 
-        // And we don't forget to set the state storage with the new value ON BOTH SIDES
+        // And we don't forget to set the state storage with the new value ON BOTH SIDES if not conversation to self
         env.storage().instance().set(&key.clone(), &conversation);
-        env.storage()
-            .instance()
-            .set(&key_other_side.clone(), &conversation);
+        if from != to {
+            let key_other_side = DataKey::Conversations(ConversationsKey(to.clone(), from.clone()));
+            env.storage()
+                .instance()
+                .set(&key_other_side.clone(), &conversation);
+        }
     }
 
     pub fn read_conversation(env: Env, from: Address, to: Address) -> Conversation {
