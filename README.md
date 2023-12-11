@@ -6,7 +6,7 @@ Built using the [@create-soroban-dapp](https://github.com/paltalabs/create-sorob
 
 ![Preview](image.png)
 
-You can find a written [tutorial]() explaining how to create the dapp on my dev.to 🚀
+You can find a written [tutorial](https://dev.to/benjaminsalon/sorochat-how-to-build-a-simple-chat-dapp-using-create-soroban-dapp-295l) explaining how to create the dapp on my dev.to 🚀
 ## Build and run
 
 To build the dapp first clone the repo
