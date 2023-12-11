@@ -1,18 +1,15 @@
 import { BaseLayout } from '@/components/layout/BaseLayout'
 import { HotToastConfig } from '@/components/layout/HotToastConfig'
-// import { getDeployments } from '@/deployments/deployments'
 import GlobalStyles from '@/styles/GlobalStyles'
 import { ChakraProvider, DarkMode } from '@chakra-ui/react'
 import { cache } from '@emotion/css'
 import { CacheProvider } from '@emotion/react'
-// import { UseInkathonProvider } from '@scio-labs/use-inkathon'
 import { DefaultSeo } from 'next-seo'
 import type { AppProps } from 'next/app'
 import { Inconsolata } from 'next/font/google'
 import Head from 'next/head'
 
 import MySorobanReactProvider from "../components/web3/MySorobanReactProvider"
-// import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 // Google Font(s) via `next/font`
 const inconsolata = Inconsolata({ subsets: ['latin'] })
@@ -20,7 +17,6 @@ const inconsolata = Inconsolata({ subsets: ['latin'] })
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
-    {/* <SafeAreaProvider> */}
       {/* TODO SEO */}
       <DefaultSeo
         // dangerouslySetAllPagesToNoFollow={!env.isProduction}
@@ -72,7 +68,6 @@ function MyApp({ Component, pageProps }: AppProps) {
           </ChakraProvider>
         </CacheProvider>
       </MySorobanReactProvider>
-      {/* </SafeAreaProvider> */}
     </>
   )
 }

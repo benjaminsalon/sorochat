@@ -42,7 +42,6 @@ fn test() {
 
     client.write_message(&from, &to_2, &String::from_slice(&env, "Bonjour l'ami!"));
     let conversation_after = client.read_conversation(&from, &to_2);
-    // log!(&env, "{:?}", conversation_after);
     assert_eq!(conversation_after.len(), 1);
     assert_eq!(
         conversation_after,
