@@ -7,7 +7,7 @@ import type {ChainMetadata, Connector} from "@soroban-react/types";
 const chains: ChainMetadata[] = [sandbox, standalone, futurenet,testnet];
 const connectors: Connector[] = [freighter()]
                           
-                          
+// The Context Provider which allows for having access to the soroban react library methods        
 export default function MySorobanReactProvider({children}:{children: React.ReactNode}) {
     return (
       <SorobanReactProvider

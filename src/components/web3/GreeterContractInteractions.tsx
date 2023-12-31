@@ -34,24 +34,33 @@ export const GreeterContractInteractions: FC = () => {
   const [conversationDisplayedAddress, setConversationDisplayedAddress] = useState<string>("")
   const [conversationDisplayed, setConversationDisplayed] = useState<Array<MessageType>>([])
   const [conversationIsLoading, setConversationIsLoading] = useState<boolean>(false)
-  // Fetch the addresses of every initiated conversation
+
+
+  // Fetch the addresses of every initiated conversations
+  // All functions are using the useCallback hook for only updating the function if one parameter changes.
   const fetchConversationsInitiated = useCallback(async () => {
+    // We need the context to be set up correctly, we need a server to talk to
     if (!sorobanContext.server) return
 
     const currentChain = sorobanContext.activeChain?.name?.toLocaleLowerCase()
+
+    // We need an address set for the user
     if (!address) {
       return
-    }
+    } // and a chain chosen
     else if (!currentChain) {
       console.log("No active chain")
       toast.error('Wallet not connected. Try again…')
       return
     }
     else {
+      // Retrieve the contract address of the chat in the json
       const contractAddress = (contracts_ids as Record<string,Record<string,string>>)[currentChain]?.chat;
+      // We store it in the state to display it
       setContractAddressStored(contractAddress)
       
       try {
+        // We call the getter method on the contract to retrieve the list of addresses the user has talked to
         const result = await contractInvoke({
           contractAddress,
           method: 'read_conversations_initiated',
@@ -73,11 +82,14 @@ export const GreeterContractInteractions: FC = () => {
     }
   },[sorobanContext, address])
 
+  // And we want the latter function to be called each time we have a frontend update, or when the user changes the connected address.
   useEffect(() => {void fetchConversationsInitiated()}, [updateFrontend,fetchConversationsInitiated])
 
 
 
+  // This function will be called each time the user click the send message button
   const sendMessage = async ({ newMessage, destinationAddress }: NewMessageData ) => {
+    // Same as earlier, we check that the context is well setup
     if (!address) {
       console.log("Address is not defined")
       toast.error('Wallet is not connected. Try again...')
@@ -96,14 +108,18 @@ export const GreeterContractInteractions: FC = () => {
         return
       }
       else {
+        // We retrieve the contract address
         const contractAddress = (contracts_ids as Record<string,Record<string,string>>)[currentChain]?.chat;
 
+        // This state is used for displaying loading messages and disabling button while loading
         setUpdateIsLoading(true)
 
         try {
+          // Here we call the setter method to write a new message in the chat
           const result = await contractInvoke({
             contractAddress,
             method: 'write_message',
+            // In the next line, we are testing if a specific destination address was given, otherwise we use the address of which the chat is currently displayed
             args: [new SorobanClient.Address(address).toScVal(),destinationAddress ? new SorobanClient.Address(destinationAddress).toScVal() : new SorobanClient.Address(conversationDisplayedAddress).toScVal(), stringToScVal(newMessage)],
             sorobanContext,
             signAndSend: true
@@ -112,6 +128,7 @@ export const GreeterContractInteractions: FC = () => {
           if (result) {
             toast.success("New chat successfully published!")
             if (destinationAddress && destinationAddress != conversationDisplayedAddress) {
+              // If there was a destination address given then we want to display the chat corresponding to the address we just sent a chat to
               setConversationDisplayedAddress(destinationAddress)
             }
           }
@@ -123,6 +140,7 @@ export const GreeterContractInteractions: FC = () => {
           console.error(e)
           toast.error('Error while sending tx. Try again…')
         } finally {
+          // We stop the loading display
           setUpdateIsLoading(false)
           toggleUpdate(!updateFrontend)
         } 
@@ -132,7 +150,9 @@ export const GreeterContractInteractions: FC = () => {
     }
   }
 
+  // This method will be used to fetch the entire conversation of the address we want to display the chat
   const fetchConversation = useCallback(async () => {
+    // Same checks on context
     if (!sorobanContext.server) return
     if (!address) {
       console.log("Address is not defined")
@@ -152,9 +172,12 @@ export const GreeterContractInteractions: FC = () => {
         return
       }
       else if (conversationDisplayedAddress) {
+        // We retrieve contract address
         const contractAddress = (contracts_ids as Record<string,Record<string,string>>)[currentChain]?.chat;
+        // Set the loading
         setConversationIsLoading(true)
         try {
+          // Call the getter method
           const result = await contractInvoke({
             contractAddress,
             method: 'read_conversation',
@@ -164,10 +187,9 @@ export const GreeterContractInteractions: FC = () => {
           if (!result) throw new Error("Error while fetching. Try Again")
 
           // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
-          // You can check out the scValConversion.tsx file to see how it's done
           console.log("CONVERSATION FETCHED =",SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal))
           const conversation = SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal) as Array<MessageType>
-          // const result_string = scvalToString(result as SorobanClient.xdr.ScVal)
+          // We then change the state. This state value will be used by the conversation component to diplay chats
           setConversationDisplayed(conversation)
         } catch (e) {
           console.error(e)
@@ -180,8 +202,10 @@ export const GreeterContractInteractions: FC = () => {
     }
   }, [conversationDisplayedAddress])
 
+  // We want to update this when the conversationDisplayedAddress changes, or when something in the context changes, or when we decide to toggle a frontend update.
   useEffect(() => {void fetchConversation()}, [conversationDisplayedAddress,updateFrontend,fetchConversation,sorobanContext])
 
+  // This is used to clear the conversation displayed when the user changes the connected address.
   useEffect(() => {
     setConversationDisplayedAddress("")
   }, [address])
@@ -236,6 +260,7 @@ export const GreeterContractInteractions: FC = () => {
           {contractAddressStored ? <Link href={"https://stellar.expert/explorer/testnet/contract/" + contractAddressStored} target="_blank">{contractAddressStored}</Link> : "Loading address.."}
         </p>
         </div>
+        {/* Displayed conversation */}
         <Card variant="outline" p={4} bgColor="whiteAlpha.100">
             
             {!conversationIsLoading ?
