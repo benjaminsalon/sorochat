@@ -72,8 +72,8 @@ export const GreeterContractInteractions: FC = () => {
         // if (!result) throw new Error("Error while fetching. Try Again")
 
         // // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
-        // const conversationsInitiated: Array<string> = StellarSdk.scValToNative(result as StellarSdk.xdr.ScVal) as Array<string>
-        // setConversationsInitiatedList(conversationsInitiated)
+        const conversationsInitiated: Array<string> = StellarSdk.scValToNative(result as StellarSdk.xdr.ScVal) as Array<string>
+        setConversationsInitiatedList(conversationsInitiated)
       } catch (e) {
         console.error(e)
         toast.error('Error while fetching list of conversations. Try again…')
@@ -87,7 +87,7 @@ export const GreeterContractInteractions: FC = () => {
   // And we want the latter function to be called each time we have a frontend update, or when the user changes the connected address.
   useEffect(() => {void fetchConversationsInitiated()}, [updateFrontend,fetchConversationsInitiated])
 
-
+    
 
   // This function will be called each time the user click the send message button
   const sendMessage = async ({ newMessage, destinationAddress }: NewMessageData ) => {
@@ -209,7 +209,7 @@ export const GreeterContractInteractions: FC = () => {
 
   // This is used to clear the conversation displayed when the user changes the connected address.
   useEffect(() => {
-    setConversationDisplayedAddress("")
+  setConversationDisplayedAddress("")
   }, [address])
 
   return (
