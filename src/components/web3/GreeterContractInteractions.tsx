@@ -62,7 +62,7 @@ export const GreeterContractInteractions: FC = () => {
       
       try {
         // We call the getter method on the contract to retrieve the list of addresses the user has talked to
-        let address_to_fetch : StellarSdk.xdr.ScVal = new StellarSdk.Address(address).toScVal();
+        const address_to_fetch : StellarSdk.xdr.ScVal = new StellarSdk.Address(address).toScVal();
         const result = await contractInvoke({
           contractAddress,
           method: 'read_conversations_initiated',
