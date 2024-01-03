@@ -5,7 +5,8 @@ import toast from 'react-hot-toast'
 import 'twin.macro'
 
 import { useSorobanReact } from "@soroban-react/core"
-import * as SorobanClient from 'soroban-client';
+// import * as SorobanClient from 'soroban-client';
+import * as StellarSdk from 'stellar-sdk';
 import { contractInvoke } from '@soroban-react/contracts'
 
 import contracts_ids from 'contracts/contracts_ids.json'
@@ -18,7 +19,7 @@ import {type MessageType} from '../chat/Message'
 type NewMessageData = { newMessage: string, destinationAddress: string }
 
 function stringToScVal(title: string) {
-  return SorobanClient.xdr.ScVal.scvString(title)
+  return StellarSdk.xdr.ScVal.scvString(title)
 }
 
 export const GreeterContractInteractions: FC = () => {
@@ -61,17 +62,18 @@ export const GreeterContractInteractions: FC = () => {
       
       try {
         // We call the getter method on the contract to retrieve the list of addresses the user has talked to
+        let address_to_fetch : StellarSdk.xdr.ScVal = new StellarSdk.Address(address).toScVal();
         const result = await contractInvoke({
           contractAddress,
           method: 'read_conversations_initiated',
-          args: [new SorobanClient.Address(address).toScVal()],
+          args: [ address_to_fetch],
           sorobanContext
         })
-        if (!result) throw new Error("Error while fetching. Try Again")
+        // if (!result) throw new Error("Error while fetching. Try Again")
 
-        // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
-        const conversationsInitiated: Array<string> = SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal) as Array<string>
-        setConversationsInitiatedList(conversationsInitiated)
+        // // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
+        // const conversationsInitiated: Array<string> = StellarSdk.scValToNative(result as StellarSdk.xdr.ScVal) as Array<string>
+        // setConversationsInitiatedList(conversationsInitiated)
       } catch (e) {
         console.error(e)
         toast.error('Error while fetching list of conversations. Try again…')
@@ -120,7 +122,7 @@ export const GreeterContractInteractions: FC = () => {
             contractAddress,
             method: 'write_message',
             // In the next line, we are testing if a specific destination address was given, otherwise we use the address of which the chat is currently displayed
-            args: [new SorobanClient.Address(address).toScVal(),destinationAddress ? new SorobanClient.Address(destinationAddress).toScVal() : new SorobanClient.Address(conversationDisplayedAddress).toScVal(), stringToScVal(newMessage)],
+            args: [new StellarSdk.Address(address).toScVal(),destinationAddress ? new StellarSdk.Address(destinationAddress).toScVal() : new StellarSdk.Address(conversationDisplayedAddress).toScVal(), stringToScVal(newMessage)],
             sorobanContext,
             signAndSend: true
           })
@@ -181,14 +183,14 @@ export const GreeterContractInteractions: FC = () => {
           const result = await contractInvoke({
             contractAddress,
             method: 'read_conversation',
-            args: [new SorobanClient.Address(address).toScVal(),new SorobanClient.Address(conversationDisplayedAddress).toScVal()],
+            args: [new StellarSdk.Address(address).toScVal(),new StellarSdk.Address(conversationDisplayedAddress).toScVal()],
             sorobanContext
           })
           if (!result) throw new Error("Error while fetching. Try Again")
 
           // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
-          console.log("CONVERSATION FETCHED =",SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal))
-          const conversation = SorobanClient.scValToNative(result as SorobanClient.xdr.ScVal) as Array<MessageType>
+          console.log("CONVERSATION FETCHED =",StellarSdk.scValToNative(result as StellarSdk.xdr.ScVal))
+          const conversation = StellarSdk.scValToNative(result as StellarSdk.xdr.ScVal) as Array<MessageType>
           // We then change the state. This state value will be used by the conversation component to diplay chats
           setConversationDisplayed(conversation)
         } catch (e) {
