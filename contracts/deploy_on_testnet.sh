@@ -14,7 +14,10 @@ soroban config network add --global testnet \
   --network-passphrase "Test SDF Network ; September 2015"
 
 echo "Configuring deployer identity"
-soroban config identity generate deployer
+soroban config identity generate deployer \
+    --rpc-url https://soroban-testnet.stellar.org:443 \
+  --network-passphrase "Test SDF Network ; September 2015"\
+  --network testnet
 
 echo -e "\n\n"
 
