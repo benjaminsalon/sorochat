@@ -13,5 +13,10 @@
     "contractId": "greeting",
     "networkPassphrase": "Test SDF Network ; September 2015",
     "contractAddress": "CBV2BB3VIEUISW3ZYWDTC6JR3HN7NXWR3MHPHYHDLSTMENVOGY5ZCGGB"
+  },
+  {
+    "contractId": "chat",
+    "networkPassphrase": "Test SDF Future Network ; October 2022",
+    "contractAddress": "CBTN3IUZ4U5WNSI5KVFPLM4NVZAVMU64JLRM5DE6BKQCXPSHGGNCRLWP"
   }
 ]
