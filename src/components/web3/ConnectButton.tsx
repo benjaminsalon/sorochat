@@ -48,8 +48,6 @@ export const ConnectButton = () => {
                     key={w.name}
                     onClick={() => {
                       setActiveConnectorAndConnect && setActiveConnectorAndConnect(w)
-                      console.log("After setActiveConnector, connector is", activeConnector)
-                      console.log("Address connected is ", address) 
                     }}
                     tw="bg-transparent hocus:bg-gray-800"
                   >
