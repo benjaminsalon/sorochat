@@ -8,10 +8,9 @@ import { useSorobanReact } from "@soroban-react/core"
 import * as StellarSdk from '@stellar/stellar-sdk';
 
 import React from 'react'
-import Link from 'next/link'
 
 import { useRegisteredContract } from '@soroban-react/contracts'
-import { MessageType } from '../chat/Message'
+import { type MessageType } from '../chat/Message'
 import Conversation from '../chat/Conversation'
 
 type NewMessageData = { newMessage: string, destinationAddress: string }
@@ -40,7 +39,6 @@ export const GreeterContractInteractions: FC = () => {
   
   const [fetchedConversationsInitiatedList, setConversationsInitiatedList] = useState<Array<string>>([])
   const [updateFrontend, toggleUpdate] = useState<boolean>(true)
-  const [contractAddressStored, setContractAddressStored] = useState<string>()
   const [displayedConversationAddress, setDisplayedConversationAddress] = useState<string>("")
   const [displayedConversation, setDisplayedConversation] = useState<Array<MessageType>>([])
 
@@ -63,10 +61,6 @@ export const GreeterContractInteractions: FC = () => {
       return
     }
     else {
-      // Retrieve the contract address of the chat in the json
-      const contractAddress = contract?.deploymentInfo.contractAddress
-      // We store it in the state to display it
-      setContractAddressStored(contractAddress)
       setFetchIsLoading(true)
       try {
         const result = await contract?.invoke({
@@ -77,7 +71,7 @@ export const GreeterContractInteractions: FC = () => {
         if (!result) return
         // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
         // You can check out the scValConversion.tsx file to see how it's done
-        const result_array = StellarSdk.scValToNative(result as StellarSdk.xdr.ScVal)
+        const result_array = StellarSdk.scValToNative(result as StellarSdk.xdr.ScVal) as Array<string>
         console.log(result_array)
         setConversationsInitiatedList(result_array)
       } catch (e) {
@@ -88,7 +82,7 @@ export const GreeterContractInteractions: FC = () => {
         setFetchIsLoading(false)
       }
     }
-  },[sorobanContext,contract])
+  },[sorobanContext,contract, address])
 
   useEffect(() => {void fetchConversationsInitiated()}, [updateFrontend,fetchConversationsInitiated])
 
@@ -140,7 +134,7 @@ export const GreeterContractInteractions: FC = () => {
           toast.error('Error while sending tx. Try again…')
         } finally {
           setUpdateIsLoading(false)
-          // toggleUpdate(!updateFrontend)
+          toggleUpdate(!updateFrontend)
         } 
 
         // await sorobanContext.connect();
@@ -161,8 +155,6 @@ export const GreeterContractInteractions: FC = () => {
       return
     }
     else if (displayedConversationAddress){
-      const contractAddress = contract?.deploymentInfo.contractAddress
-      setContractAddressStored(contractAddress)
       setFetchIsLoading(true)
       try {
         const result = await contract?.invoke({
@@ -173,7 +165,7 @@ export const GreeterContractInteractions: FC = () => {
         if (!result) return
         // Value needs to be cast into a string as we fetch a ScVal which is not readable as is.
         // You can check out the scValConversion.tsx file to see how it's done
-        const result_array = StellarSdk.scValToNative(result as StellarSdk.xdr.ScVal)
+        const result_array = StellarSdk.scValToNative(result as StellarSdk.xdr.ScVal) as Array<MessageType>
         console.log(result_array)
         setDisplayedConversation(result_array)
       } catch (e) {
@@ -184,7 +176,7 @@ export const GreeterContractInteractions: FC = () => {
         setFetchIsLoading(false)
       }
     }
-  },[sorobanContext,contract,displayedConversationAddress])
+  },[sorobanContext,contract,displayedConversationAddress, address])
 
   useEffect(() => {void fetchConversation()}, [updateFrontend,fetchConversation, address, displayedConversationAddress])  
 
