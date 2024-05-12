@@ -8,9 +8,9 @@ fn test() {
     let env = Env::default();
     env.mock_all_auths();
 
-    let from = Address::random(&env);
-    let to = Address::random(&env);
-    let to_2 = Address::random(&env);
+    let from = Address::generate(&env);
+    let to = Address::generate(&env);
+    let to_2 = Address::generate(&env);
 
     let contract_id = env.register_contract(None, ChatContract);
     let client = ChatContractClient::new(&env, &contract_id);
@@ -20,7 +20,7 @@ fn test() {
     let conversations_initiated = client.read_conversations_initiated(&from);
     assert_eq!(conversations_initiated, vec![&env]);
 
-    client.write_message(&from, &to, &String::from_slice(&env, "Bonjour l'ami!"));
+    client.write_message(&from, &to, &String::from_str(&env, "Bonjour l'ami!"));
     let conversation_after = client.read_conversation(&from, &to);
     // log!(&env, "{:?}", conversation_after);
     assert_eq!(conversation_after.len(), 1);
@@ -29,7 +29,7 @@ fn test() {
         vec![
             &env,
             Message {
-                msg: String::from_slice(&env, "Bonjour l'ami!"),
+                msg: String::from_str(&env, "Bonjour l'ami!"),
                 from: from.clone()
             }
         ]
@@ -40,7 +40,7 @@ fn test() {
     let conversations_initiated = client.read_conversations_initiated(&to);
     assert_eq!(conversations_initiated, vec![&env, from.clone()]);
 
-    client.write_message(&from, &to_2, &String::from_slice(&env, "Bonjour l'ami!"));
+    client.write_message(&from, &to_2, &String::from_str(&env, "Bonjour l'ami!"));
     let conversation_after = client.read_conversation(&from, &to_2);
     assert_eq!(conversation_after.len(), 1);
     assert_eq!(
@@ -48,7 +48,7 @@ fn test() {
         vec![
             &env,
             Message {
-                msg: String::from_slice(&env, "Bonjour l'ami!"),
+                msg: String::from_str(&env, "Bonjour l'ami!"),
                 from: from.clone()
             }
         ]
